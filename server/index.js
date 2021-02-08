@@ -4,16 +4,21 @@ const cors = require('cors');
 const app = express();
 const mysql = require('mysql');
 
+//Initiating DataBase
 const db = mysql.createPool({
-    host: 'yourHostHere',
-    user: 'yourUserHere',
-    password:'yourPasswordHere',
-    database:'yourDatabaseHere',
+    host: 'yourHost',
+    user: 'yourUser',
+    password:'yourPassword',
+    database:'yourDatabase',
 });
+
+//Handling JSON
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.urlencoded({extended:true}));
 
+
+//Getting or recieving data from database
 app.get('/api/get', (req, res)=>{
     const sqlSelect = "SELECT * FROM movie_reviews";
     db.query(sqlSelect, (err, result)=>{
@@ -21,6 +26,8 @@ app.get('/api/get', (req, res)=>{
     });
 })
 
+
+//Sending, pushing, or posting data to database
 app.post('/api/insert', (req, res)=>{
     const movieName = req.body.movieName;
     const movieReview = req.body.movieReview;
@@ -31,6 +38,28 @@ app.post('/api/insert', (req, res)=>{
     });
 });
 
+//updating existing data in database
+app.put("/api/update", (req, res)=>{
+    const name = req.body.movieName;
+    const review = req.body.movieReview;
+
+    const sqlUpdate = "UPDATE movie_reviews SET movieReview = ? WHERE movieName = ?"
+    db.query(sqlUpdate, [review, name], (err, result)=>{
+        if(err) console.log(err);
+    })
+})
+
+//Removing or deleting data from database
+app.delete("/api/delete/:movieName",(req, res)=>{
+    const name = req.params.movieName;
+
+    const sqlDelete = "DELETE FROM movie_reviews WHERE movieName = ?"
+    db.query(sqlDelete, name, (err, result)=>{
+        if(err) console.log(err);
+    })
+})
+
+//Declaring where server will be
 app.listen(3001, ()=>{
     console.log('running on port 3001')
 })
